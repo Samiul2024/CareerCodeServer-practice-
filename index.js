@@ -2,6 +2,9 @@ const express = require('express')
 const cors = require('cors')
 const app = express();
 const port = process.env.PORT || 3000;
+const admin = require("firebase-admin");
+const serviceAccount = require("./firebase-admin-service-key.json");
+
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 
@@ -22,6 +25,12 @@ const client = new MongoClient(uri, {
   }
 });
 
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+
 const verifyFirebaseToken = async (req, res, next) => {
   // console.log('token in the middleware', req.headers);
   const authHeader = req.headers?.authorization;
@@ -31,8 +40,19 @@ const verifyFirebaseToken = async (req, res, next) => {
   }
 
   const token = authHeader.split(' ')[1];
-  console.log('token in the middleware', token);
-  next();
+
+  try {
+    const decoded = await admin.auth().verifyIdToken(token)
+    console.log('decoded token', decoded);
+    req.decoded = decoded;
+    next();
+  }
+  catch (error) {
+    return res.status(401).send({ message: 'unauthorized access' })
+  }
+
+  // console.log('token in the middleware', token);
+
 }
 
 async function run() {
@@ -65,8 +85,13 @@ async function run() {
     //   res.send(result);
     // })
 
-    app.get('/jobs/applications', async (req, res) => {
+    app.get('/jobs/applications', verifyFirebaseToken, async (req, res) => {
       const email = req.query.email;
+
+      if (email !== req.decoded.email) {
+        return res.status(403).send({ message: 'forbidden access' })
+      }
+
       const query = { hr_email: email };
       const jobs = await jobsCollection.find(query).toArray();
 
@@ -99,6 +124,10 @@ async function run() {
     // job applications related apis
     app.get('/applications', verifyFirebaseToken, async (req, res) => {
       const email = req.query.email;
+
+      if (email !== req.decoded.email) {
+        return res.status(403).message({ message: 'forbidden access' })
+      }
 
       // console.log('req header', req.headers);
 
