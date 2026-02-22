@@ -51,6 +51,13 @@ const verifyFirebaseToken = async (req, res, next) => {
     return res.status(401).send({ message: 'unauthorized access' })
   }
 
+  const verifyTokenEmail = (req, res, next) => {
+    if (req.query.email !== req.decoded.email) {
+      return res.status(403).send({ message: 'forbidden access' })
+    }
+    next();
+  }
+
   // console.log('token in the middleware', token);
 
 }
@@ -85,12 +92,10 @@ async function run() {
     //   res.send(result);
     // })
 
-    app.get('/jobs/applications', verifyFirebaseToken, async (req, res) => {
+    app.get('/jobs/applications', verifyFirebaseToken, verifyTokenEmail, async (req, res) => {
       const email = req.query.email;
 
-      if (email !== req.decoded.email) {
-        return res.status(403).send({ message: 'forbidden access' })
-      }
+
 
       const query = { hr_email: email };
       const jobs = await jobsCollection.find(query).toArray();
@@ -122,12 +127,12 @@ async function run() {
 
 
     // job applications related apis
-    app.get('/applications', verifyFirebaseToken, async (req, res) => {
+    app.get('/applications', verifyFirebaseToken, verifyTokenEmail, async (req, res) => {
       const email = req.query.email;
 
-      if (email !== req.decoded.email) {
-        return res.status(403).message({ message: 'forbidden access' })
-      }
+      // if (email !== req.decoded.email) {
+      //   return res.status(403).message({ message: 'forbidden access' })
+      // }
 
       // console.log('req header', req.headers);
 
