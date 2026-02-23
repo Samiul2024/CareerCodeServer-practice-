@@ -50,18 +50,16 @@ const verifyFirebaseToken = async (req, res, next) => {
   catch (error) {
     return res.status(401).send({ message: 'unauthorized access' })
   }
-
-  const verifyTokenEmail = (req, res, next) => {
-    if (req.query.email !== req.decoded.email) {
-      return res.status(403).send({ message: 'forbidden access' })
-    }
-    next();
-  }
-
   // console.log('token in the middleware', token);
 
 }
 
+const verifyTokenEmail = (req, res, next) => {
+  if (req.query.email !== req.decoded.email) {
+    return res.status(403).send({ message: 'forbidden access' })
+  }
+  next();
+}
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
