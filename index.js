@@ -3,7 +3,7 @@ const cors = require('cors')
 const app = express();
 const port = process.env.PORT || 3000;
 const admin = require("firebase-admin");
-const serviceAccount = require("./firebase-admin-service-key.json");
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_KEY);
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
@@ -195,7 +195,7 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-  res.send('Career Code is Cooking at 2026/24/2')
+  res.send('Career Code is Cooking at 2026')
 })
 
 app.listen(port, () => {
