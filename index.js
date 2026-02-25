@@ -63,7 +63,7 @@ const verifyTokenEmail = (req, res, next) => {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    client.connect();
 
     const jobsCollection = client.db('careerCode').collection('jobs');
     const applicationsCollection = client.db('careerCode').collection('applications')
